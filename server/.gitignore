@@ -1,0 +1,70 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# MySQL and Database
+*.sql
+*.sqlite
+*.sqlite3
+db-*.json
+*.db
+mysql.log
+
+# Environment Variables
+.env
+.env.* # If you use multiple environment files like .env.production
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Config Files
+config.json
+*.config.js
+*.config.ts
+*.ini
+
+# Build Directories (e.g. dist/, build/, etc.)
+dist/
+build/
+tmp/
+temp/
+
+# Editor Files
+*.swp
+*.swo
+*.bak
+*~
+*.vscode/
+.idea/
+
+# SSL Certificates (if applicable)
+*.pem
+*.crt
+*.key
+
+# Ignore uploads (user-uploaded content)
+uploads/
+public/uploads/
+static/uploads/
+
+# Ignore system generated logs and PID files
+*.pid
+*.seed
+*.pid.lock
+*.pidfile
+
+# Git conflict files
+*.orig
+
+# Compiled files
+*.out
+*.o
+*.so
+*.dll
