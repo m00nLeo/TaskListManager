@@ -9,16 +9,15 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { SortableContainer, SortableElement } from "react-sortable-hoc"; //`react-sortable-hoc` relies on findDOMNode so its will cause several warning
 import { arrayMoveImmutable as arrayMove } from "array-move"; // Updated import
-
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // ignore warning findDOMNode error caused by `react-sortable-hoc`
 const originalError = console.error;
 console.error = (...args) => {
   if (
-    typeof args[0] === "string" &&
-    args[0].includes("Warning: findDOMNode is deprecated")||
+    (typeof args[0] === "string" &&
+      args[0].includes("Warning: findDOMNode is deprecated")) ||
     args[0].includes("Warning: %s is deprecated")
-
   ) {
     return;
   }
@@ -29,23 +28,25 @@ console.error = (...args) => {
 const SortableItem = SortableElement(
   ({ item, handleDelete, handleCheckboxChange }) => (
     <div
-      className={`flex items-center gap-4 bg-white shadow-xl rounded-lg w-full px-8 py-2 mb-3 transition-all duration-150 delay-100 no-select ${
-        !item.checked ? "opacity-100" : "opacity-55"
-      }`}
+      className={`flex flex-col md:flex-row items-center gap-1 md:gap-4 bg-white shadow-2xl rounded-lg w-3/4 md:w-full mx-auto md:px-8 py-2 mb-3 transition-all duration-150 delay-100 no-select ${
+        !item.checked ? "opacity-100 hover:animate-gradient-border" : "opacity-55"
+      }  border-4 borderWhite`}
     >
       {/* Task UI */}
-      <div className="w-full py-4">
-        <div className="flex flex-col gap-2 justify-center ">
+      <div className="w-full py-2 md:py-4">
+        <div className="flex flex-col gap-2 justify-center items-center md:items-start">
           {/* title */}
-          <p className="bg-orange-400/80 font-bold text-white rounded-lg px-2 py-1 w-fit capitalize">
+          <p className="bg-orange-400/80 font-bold text-white rounded-lg px-2 py-1 w-fit capitalize text-xs md:text-base">
             {item.title}
           </p>
 
           {/* description */}
-          <p className="italic font-light px-1 text-md">{item.description}</p>
+          <p className="italic font-light px-1 text-xs md:text-md">
+            {item.description}
+          </p>
 
           {/* Time & Button */}
-          <div className="text-gray-600 italic font-normal text-md flex justify-between items-center w-full">
+          <div className="text-gray-600 italic font-normal text-xs md:text-base gap-1 md:gap-0 flex flex-col md:flex-row justify-between items-center w-full">
             {/* Date Input Task */}
             <p className="flex items-center gap-1">
               <IoMdTime />
@@ -55,6 +56,7 @@ const SortableItem = SortableElement(
                 year: "numeric",
               })}
             </p>
+
             {/* Deadline */}
             <p className="flex items-center gap-1 font-bold text-orange-400 rounded-lg px-2">
               <IoMdTime />
@@ -65,7 +67,7 @@ const SortableItem = SortableElement(
               })}
             </p>
             {/* Edit and Delete Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 md:gap-3 p-2 md:p-0">
               {/* Edit button */}
               <Link to={`/update/${item.id}`}>
                 <button className="btn btn-warning" disabled={item.checked}>
@@ -200,12 +202,14 @@ const SortableList = SortableContainer(
 
 const HomeList = () => {
   const [list, setList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch items list
   const fetchList = async () => {
     try {
       const response = await axios.get("http://localhost:3000");
       setList(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching list:", error);
     }
@@ -293,21 +297,25 @@ const HomeList = () => {
 
   return (
     <Card>
-      <h2 className="text-center mb-4 text-[#f96c6c] uppercase font-bold text-xl">
+      <h2 className="text-center mb-4 text-[#f96c6c] uppercase font-bold text-base md:text-xl">
         To do List
       </h2>
-      <div className="my-4 px-2 text-lg rounded-sm transition-all duration-150 delay-75 hover:text-gray-500 w-full text-right focus:no-underline">
+      <div className="my-4 px-2 text-sm md:text-lg rounded-sm transition-all duration-150 delay-75 hover:text-gray-500 w-full text-right focus:no-underline">
         <Link to="/add" style={{ textDecoration: "none" }}>
           + Add a Card
         </Link>
       </div>
-
-      <SortableList
-        items={list}
-        onSortEnd={onSortEnd}
-        handleDelete={handleDelete}
-        handleCheckboxChange={handleCheckboxChange}
-      />
+      
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <SortableList
+          items={list}
+          onSortEnd={onSortEnd}
+          handleDelete={handleDelete}
+          handleCheckboxChange={handleCheckboxChange}
+        />
+      )}
 
       <ToastContainer
         position="bottom-left"

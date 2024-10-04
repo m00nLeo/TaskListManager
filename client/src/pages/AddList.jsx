@@ -12,10 +12,12 @@ const AddList = () => {
   const [date, setDate] = useState("");
   const [list, setList] = useState([]);
   const [order, setOrder] = useState([0]);
+  const [errors, setErrors] = useState({});
 
   const day = String(new Date().getDate()).padStart(2, "0");
-  const month = String(new Date().getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const month = String(new Date().getMonth() + 1).padStart(2, "0");
   const year = new Date().getFullYear();
+  const today = `${year}-${month}-${day}`;
 
   // Fetch items list
   const fetchList = async () => {
@@ -33,85 +35,142 @@ const AddList = () => {
 
   useEffect(() => {
     if (list.length > 0) {
-      const orders = list.map((e) => e.order); // Get all the order values
-      setOrder(orders); // Set them at once
+      const orders = list.map((e) => e.order);
+      setOrder(orders);
     }
-  }, [list]); // Run this effect whenever the 'list' changes
+  }, [list]);
+
+  // Validate form fields
+  const validateForm = () => {
+    let validationErrors = {};
+    // Adding key-value pairs to Object
+    if (!title) validationErrors.title = "*Title is required";
+    if (!description) validationErrors.description = "*Description is required";
+    if (!date) validationErrors.date = "*Deadline date is required";
+    else if (new Date(date) < new Date(today)) {
+      validationErrors.date = "*Deadline cannot be in the past";
+    }
+
+    setErrors(validationErrors);
+    
+    // Check if there are any Object keys -> Check true===0 (no Object Keys) / false
+    return Object.keys(validationErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // If false its mean that has one or more emty input  
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form.", { theme: "dark" });
+      return;
+    }
+
     try {
-      axios.post("http://localhost:3000/add", {
+      await axios.post("http://localhost:3000/add", {
         order: Math.max(...order) + 1,
-        title: title,
-        description: description,
-        date_input: `${year}-${month}-${day}`,
+        title,
+        description,
+        date_input: today,
         deadline: date,
       });
 
-      // Return results from server
-      // Toastify
-      toast.success("Task had been added successfully", {
+      toast.success("Task added successfully", {
         theme: "light",
       });
 
-      // Back to hompage
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
     } catch (err) {
-      console.error("Update failed:", err);
-      toast.error("Failed to added task. Please try again.", {
-        theme: "dark",
-      });
+      console.error("Error submitting form:", err);
+      toast.error("Failed to add task. Please try again.", { theme: "dark" });
     }
   };
 
   return (
-    <Card>
+    <Card fluid={true}> 
       <form
         className="flex flex-col bg-white shadow-xl rounded-lg w-full px-8 py-2"
         onSubmit={handleSubmit}
       >
+        {/* Title Input */}
         <div className="flex flex-col mt-1 mb-2">
-          <label className="font-semibold" htmlFor="title">
-            Title
-          </label>
+          <div className="flex flex-col md:flex-row justify-between md:items-center">
+            <label className="font-semibold" htmlFor="title">
+              Title
+            </label>
+            {errors.title && (
+              <p className="text-red-500 text-sm font-semibold italic mb-2">
+                {errors.title}
+              </p>
+            )}
+          </div>
           <input
             type="text"
-            name=""
             id="title"
-            required
-            className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className={`border focus:outline-none rounded-lg px-3 py-2 ${
+              errors.title
+                ? "border-red-important-validation "
+                : "border-gray-300"
+            }`}
           />
         </div>
+
+        {/* Description Input */}
         <div className="flex flex-col mt-1 mb-2">
-          <label className="font-semibold" htmlFor="des">
-            Description
-          </label>
+          <div className="flex flex-col md:flex-row justify-between md:items-center">
+            <label className="font-semibold" htmlFor="description">
+              Description
+            </label>
+            {errors.description && (
+              <p className="text-red-500 text-sm font-semibold italic mb-2">
+                {errors.description}
+              </p>
+            )}
+          </div>
           <input
             type="text"
-            name=""
-            id="des"
-            required
-            className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
+            id="description"
+            value={description}
             onChange={(e) => setDescription(e.target.value)}
+            className={`border focus:outline-none rounded-lg px-3 py-2 ${
+              errors.description
+                ? "border-red-important-validation "
+                : "border-gray-300"
+            }`}
           />
         </div>
+
+        {/* Date Input */}
         <div className="flex flex-col mt-1 mb-2">
-          <label className="font-semibold" htmlFor="date">
-            Date finish
-          </label>
+          <div className="flex flex-col md:flex-row justify-between md:items-center">
+            <label className="font-semibold" htmlFor="date">
+              Deadline
+            </label>
+            {errors.date && (
+              <p className="text-red-500 text-sm font-semibold italic mb-2">
+                {errors.date}
+              </p>
+            )}
+          </div>
           <input
             type="date"
-            name=""
             id="date"
-            required
-            className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
+            value={date}
+            min={today}
             onChange={(e) => setDate(e.target.value)}
+            className={`border focus:outline-none rounded-lg px-3 py-2 ${
+              errors.date
+                ? "border-red-important-validation "
+                : "border-gray-300"
+            }`}
           />
         </div>
+
+        {/* Submit Button */}
         <div className="flex justify-center">
           <button
             type="submit"
@@ -135,6 +194,7 @@ const AddList = () => {
         theme="dark"
       />
 
+      {/* Back Link */}
       <div className="hover:text-gray-500">
         <Link to="/" style={{ textDecoration: "none" }}>
           <div className="mt-2 flex justify-center items-center gap-2">

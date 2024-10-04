@@ -89,7 +89,7 @@ const Update = () => {
   };
 
   return (
-    <Card>
+    <Card fluid={true}>
       <form
         className="flex flex-col bg-white shadow-xl rounded-lg w-full px-8 py-2"
         onSubmit={handleUpdate}

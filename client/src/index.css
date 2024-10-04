@@ -5,3 +5,11 @@
 .no-select {
   user-select: none;
 }
+
+.border-red-important-validation {
+  border-color: rgb(244, 67, 54) !important;
+}
+
+.borderWhite {
+  border-color: white;
+}
