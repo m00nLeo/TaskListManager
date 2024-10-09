@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddList = () => {
@@ -19,11 +19,14 @@ const AddList = () => {
   const year = new Date().getFullYear();
   const today = `${year}-${month}-${day}`;
 
+  // Is Loading
+  const [isLoading, setIsLoading] = useState(false);
+
   // Fetch items list
   const fetchList = async () => {
     try {
       const response = await axios.get("http://localhost:3000");
-      setList(response.data);
+      setList(response.data.result);
     } catch (error) {
       console.error("Error fetching list:", error);
     }
@@ -52,15 +55,17 @@ const AddList = () => {
     }
 
     setErrors(validationErrors);
-    
+
     // Check if there are any Object keys -> Check true===0 (no Object Keys) / false
     return Object.keys(validationErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // If false its mean that has one or more emty input  
+    
+    setIsLoading(true);
+    
+    // If false its mean that has one or more emty input
     if (!validateForm()) {
       toast.error("Please fix the errors in the form.", { theme: "dark" });
       return;
@@ -74,7 +79,6 @@ const AddList = () => {
         date_input: today,
         deadline: date,
       });
-
       toast.success("Task added successfully", {
         theme: "light",
       });
@@ -89,7 +93,7 @@ const AddList = () => {
   };
 
   return (
-    <Card fluid={true}> 
+    <Card fluid={true}>
       <form
         className="flex flex-col bg-white shadow-xl rounded-lg w-full px-8 py-2"
         onSubmit={handleSubmit}
@@ -172,27 +176,22 @@ const AddList = () => {
 
         {/* Submit Button */}
         <div className="flex justify-center">
-          <button
-            type="submit"
-            className="mt-3 px-2 py-3 border w-fit rounded-lg text-white font-bold bg-orange-400 transition-all duration-150 delay-75 hover:bg-orange-600"
-          >
-            Add Task
-          </button>
+          {isLoading ? (
+            <span className="mt-3 py-2 flex items-center justify-center border w-32 h-fit rounded-lg bg-orange-400/30 cursor-progress">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </span>
+          ) : (
+            <button
+              type="submit"
+              className="mt-3 px-2 py-3 border w-fit rounded-lg text-white font-bold bg-orange-400 transition-all duration-150 delay-75 hover:bg-orange-600"
+            >
+              Add Task
+            </button>
+          )}
         </div>
       </form>
-
-      <ToastContainer
-        position="bottom-left"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
 
       {/* Back Link */}
       <div className="hover:text-gray-500">

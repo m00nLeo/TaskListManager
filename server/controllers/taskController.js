@@ -1,10 +1,15 @@
 import * as taskModel from "../models/taskModel.js";
 
-// Fetch all tasks
+import paginate from "../utils/Paging.js";
+
+// Fetch / Read all tasks
 export const getTasks = (req, res) => {
+  const currentPage = parseInt(req.query.page) || 1;
+
   taskModel.getAllTasks((err, data) => {
     if (err) return res.json(err);
-    return res.json(data);
+    const paginatedData = paginate(data, currentPage)
+    return res.json(paginatedData);
   });
 };
 
@@ -19,6 +24,7 @@ export const createTask = (req, res) => {
     deadline,
     checked: false, // Default checked value
   };
+ 
 
   taskModel.createTask(taskData, (err, result) => {
     if (err) return res.json(err);

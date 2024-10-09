@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { IoMdTime } from "react-icons/io";
@@ -7,9 +7,14 @@ import { MdDeleteOutline } from "react-icons/md";
 import Card from "../components/Card";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SortableContainer, SortableElement } from "react-sortable-hoc"; //`react-sortable-hoc` relies on findDOMNode so its will cause several warning
+import {
+  SortableContainer,
+  SortableElement,
+  SortableHandle,
+} from "react-sortable-hoc"; //`react-sortable-hoc` relies on findDOMNode so its will cause several warning
 import { arrayMoveImmutable as arrayMove } from "array-move"; // Updated import
 import LoadingSpinner from "../components/LoadingSpinner";
+import Pagination from "../components/Pagination";
 
 // ignore warning findDOMNode error caused by `react-sortable-hoc`
 const originalError = console.error;
@@ -24,14 +29,27 @@ console.error = (...args) => {
   originalError(...args);
 };
 
+// Create a Drag Handle component (the dots)
+// SortableHandle is used to create the handle (DragHandle), which limits dragging to that specific element (⋮⋮ dots).
+const DragHandle = SortableHandle(() => (
+  <span className="active:cursor-grabbing cursor-grab md:mr-4 text-lg md:text-xl lg:text-2xl font-bold">
+    ⋮⋮
+  </span> // The handle (dots)
+));
+
 // Sortable task item component
 const SortableItem = SortableElement(
   ({ item, handleDelete, handleCheckboxChange }) => (
     <div
-      className={`flex flex-col md:flex-row items-center gap-1 md:gap-4 bg-white shadow-2xl rounded-lg w-3/4 md:w-full mx-auto md:px-8 py-2 mb-3 transition-all duration-150 delay-100 no-select ${
-        !item.checked ? "opacity-100 hover:animate-gradient-border" : "opacity-55"
+      className={`flex flex-col md:flex-row items-center gap-1 md:gap-4 bg-white shadow-2xl rounded-lg w-3/4 md:w-full mx-auto md:px-6 py-2 mb-3 transition-all ease-linear duration-150 delay-100 no-select ${
+        !item.checked
+          ? "opacity-100 hover:animate-gradient-border"
+          : "opacity-55"
       }  border-4 borderWhite`}
     >
+      {/* Only the DragHandle is draggable */}
+      <DragHandle />
+
       {/* Task UI */}
       <div className="w-full py-2 md:py-4">
         <div className="flex flex-col gap-2 justify-center items-center md:items-start">
@@ -69,18 +87,24 @@ const SortableItem = SortableElement(
             {/* Edit and Delete Buttons */}
             <div className="flex gap-2 md:gap-3 p-2 md:p-0">
               {/* Edit button */}
-              <Link to={`/update/${item.id}`}>
+              {item.checked ? (
                 <button className="btn btn-warning" disabled={item.checked}>
                   <FaRegEdit />
                 </button>
-              </Link>
+              ) : (
+                <Link to={`/update/${item.id}`}>
+                  <button className="btn btn-warning">
+                    <FaRegEdit />
+                  </button>
+                </Link>
+              )}
 
               {/* Delete btn */}
               <button
                 type="button"
                 className="btn btn-danger"
-                data-toggle="modal"
-                data-target={`#deleteModal${item.id}`}
+                data-bs-toggle="modal"
+                data-bs-target={`#deleteModal${item.id}`}
                 disabled={item.checked} // Disable based on the checkbox state
               >
                 <MdDeleteOutline />
@@ -91,7 +115,9 @@ const SortableItem = SortableElement(
                 className="modal fade"
                 id={`deleteModal${item.id}`}
                 tabIndex="-1"
-                role="dialog"
+                data-bs-backdrop="static"
+                data-bs-keyboard="false"
+                aria-labelledby="staticBackdropLabel"
                 aria-hidden="true"
               >
                 <div
@@ -106,7 +132,7 @@ const SortableItem = SortableElement(
                       <button
                         type="button"
                         className="close border-none focus:border-none"
-                        data-dismiss="modal"
+                        data-bs-dismiss="modal"
                         aria-label="Close"
                       >
                         &times;
@@ -122,7 +148,7 @@ const SortableItem = SortableElement(
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        data-dismiss="modal"
+                        data-bs-dismiss="modal"
                       >
                         Cancle
                       </button>
@@ -155,7 +181,7 @@ const SortableItem = SortableElement(
             onChange={() => handleCheckboxChange(item.id, !item.checked)}
             // Check if the item is checked in the state
             checked={item.checked}
-            className="peer relative h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow hover:shadow-md transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-pink-400 before:opacity-0 before:transition-opacity checked:border-blue-400 checked:bg-blue-400 checked:before:bg-pink-400 hover:before:opacity-10"
+            className="peer relative h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow-sm hover:shadow-md transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-pink-400 before:opacity-0 before:transition-opacity checked:border-blue-400 checked:bg-blue-400 checked:before:bg-pink-400 hover:before:opacity-10"
           />
           <span className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
             <svg
@@ -202,13 +228,30 @@ const SortableList = SortableContainer(
 
 const HomeList = () => {
   const [list, setList] = useState([]);
+
+  // List data for pagination for results, pages in total
+  const [listData, setListData] = useState([]);
+
+  // Is Loading
   const [isLoading, setIsLoading] = useState(true);
+
+  // Current page for Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const topElement = useRef(null);
+
+  const scrollToTop = () => {
+    topElement.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Fetch items list
   const fetchList = async () => {
     try {
-      const response = await axios.get("http://localhost:3000");
-      setList(response.data);
+      const response = await axios.get(
+        `http://localhost:3000?page=${currentPage}`
+      );
+      setList(response.data.result);
+      setListData(response.data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching list:", error);
@@ -217,7 +260,8 @@ const HomeList = () => {
 
   useEffect(() => {
     fetchList();
-  }, []);
+    scrollToTop(); // Add this to scroll to the top after fetching the list
+  }, [currentPage]);
 
   // Handle delete
   const handleDelete = async (id) => {
@@ -228,13 +272,6 @@ const HomeList = () => {
 
       // Toastify
       toast.success("Task deleted", {
-        position: "bottom-left",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "dark",
       });
 
@@ -269,7 +306,7 @@ const HomeList = () => {
     }
   };
 
-  // Handle sort end event
+  // Handle sort end event for drag and drop
   const onSortEnd = async ({ oldIndex, newIndex }) => {
     const sortedTasks = [...list].sort((a, b) => a.order - b.order);
     const updatedList = arrayMove(sortedTasks, oldIndex, newIndex);
@@ -288,15 +325,30 @@ const HomeList = () => {
       await axios.put("http://localhost:3000/", reorderedList); // Update this to server's route
     } catch (error) {
       console.error(error);
-      c;
       toast.error("Failed to update list order. Please try again.", {
         theme: "dark",
       });
     }
   };
 
+  // Handle  Function
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const previousPage = () => {
+    if (currentPage !== 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const nextPage = () => {
+    if (currentPage <= listData?.totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
   return (
-    <Card>
+    <Card topElement={topElement}>
       <h2 className="text-center mb-4 text-[#f96c6c] uppercase font-bold text-base md:text-xl">
         To do List
       </h2>
@@ -305,12 +357,14 @@ const HomeList = () => {
           + Add a Card
         </Link>
       </div>
-      
+
       {isLoading ? (
         <LoadingSpinner />
       ) : (
         <SortableList
           items={list}
+          // ensures that only the drag handle is used for dragging
+          useDragHandle={true}
           onSortEnd={onSortEnd}
           handleDelete={handleDelete}
           handleCheckboxChange={handleCheckboxChange}
@@ -328,6 +382,14 @@ const HomeList = () => {
         draggable
         pauseOnHover
         theme="dark"
+      />
+
+      <Pagination
+        handlePagination={handlePagination}
+        previousPage={previousPage}
+        nextPage={nextPage}
+        currentPage={currentPage}
+        listData={listData}
       />
     </Card>
   );

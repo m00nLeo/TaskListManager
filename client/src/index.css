@@ -1,6 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Ysabeau+Infant:ital,wght@0,1..1000;1,1..1000&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: "Ysabeau Infant", "Segoe UI", "Roboto", sans-serif;
+}
 
 .no-select {
   user-select: none;
@@ -13,3 +19,35 @@
 .borderWhite {
   border-color: white;
 }
+
+/* Scrollbar container */
+::-webkit-scrollbar {
+  width: 0.5rem; /* Width of the scrollbar */
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+  background: wheat; /* Dark gray background for the track */
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    #bc1975,
+    #c5b41c
+  ); /* Gradient color for thumb */
+  border-radius: 10px; /* Rounded corners for thumb */
+  border: 2px solid transparent; /* Optional: Padding for thumb to look better */
+  background-clip: padding-box; /* Allows gradient to respect the padding */
+}
+
+/* Scrollbar thumb hover */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    45deg,
+    #9b3971,
+    #c69835
+  ); /* Slightly different gradient on hover */
+}
+

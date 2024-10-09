@@ -12,13 +12,16 @@ const Update = () => {
   const [date, setDate] = useState("");
   const [list, setList] = useState([]);
 
+  // Is Loading
+  const [isLoading, setIsLoading] = useState(false);
+
   const { id } = useParams();
 
   // Fetch items list
   const fetchList = async () => {
     try {
       const response = await axios.get("http://localhost:3000");
-      setList(response.data);
+      setList(response.data.data);
     } catch (error) {
       console.error("Error fetching list:", error);
     }
@@ -48,6 +51,8 @@ const Update = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     // Check if there are any change detected
     if (
@@ -137,12 +142,20 @@ const Update = () => {
           />
         </div>
         <div className="flex justify-center">
-          <button
-            type="submit"
-            className="mt-3 px-2 py-3 border w-fit rounded-lg text-white font-bold bg-orange-400 transition-all duration-150 delay-75 hover:bg-orange-600"
-          >
-            Apply Change
-          </button>
+          {isLoading ? (
+            <span className="mt-3 py-2 flex items-center justify-center border w-32 h-fit rounded-lg bg-orange-400/30 cursor-progress">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </span>
+          ) : (
+            <button
+              type="submit"
+              className="mt-3 px-2 py-3 border w-fit rounded-lg text-white font-bold bg-orange-400 transition-all duration-150 delay-75 hover:bg-orange-600"
+            >
+              Apply Change
+            </button>
+          )}
         </div>
       </form>
 
