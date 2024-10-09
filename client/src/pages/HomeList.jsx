@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { IoMdTime } from "react-icons/io";
 import { FaRegEdit } from "react-icons/fa";
@@ -229,26 +229,38 @@ const SortableList = SortableContainer(
 const HomeList = () => {
   const [list, setList] = useState([]);
 
-  // List data for pagination for results, pages in total
-  const [listData, setListData] = useState([]);
-
   // Is Loading
   const [isLoading, setIsLoading] = useState(true);
 
-  // Current page for Pagination
-  const [currentPage, setCurrentPage] = useState(1);
+  // Page per sheet
+  const [pagePerSheet, setPagePerSheet] = useState(3);
 
+  // List data for pagination for results, pages in total
+  const [listData, setListData] = useState([]);
+
+  // Current page for Pagination
+  const { page } = useParams();
+  const [currentPage, setCurrentPage] = useState(parseInt(page) || 1);
+
+  // useNavigate to programmatically change routes for Pagination page route
+  const navigate = useNavigate();
+
+  // Scroll to top by using useRef
   const topElement = useRef(null);
 
   const scrollToTop = () => {
-    topElement.current?.scrollIntoView({ behavior: "smooth" });
+    if (topElement.current) {
+      topElement.current.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   // Fetch items list
   const fetchList = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000?page=${currentPage}`
+        `http://localhost:3000?page=${currentPage}&page_per_sheet=${pagePerSheet}`
       );
       setList(response.data.result);
       setListData(response.data);
@@ -260,8 +272,8 @@ const HomeList = () => {
 
   useEffect(() => {
     fetchList();
-    scrollToTop(); // Add this to scroll to the top after fetching the list
-  }, [currentPage]);
+    scrollToTop(); // scroll to the top after fetching the list
+  }, [currentPage, pagePerSheet]);
 
   // Handle delete
   const handleDelete = async (id) => {
@@ -310,7 +322,7 @@ const HomeList = () => {
   const onSortEnd = async ({ oldIndex, newIndex }) => {
     const sortedTasks = [...list].sort((a, b) => a.order - b.order);
     const updatedList = arrayMove(sortedTasks, oldIndex, newIndex);
-    // console.log(updatedList);
+    console.log(updatedList);
 
     // After reordering, update each item's 'order' property based on its position
     const reorderedList = updatedList.map((item, index) => ({
@@ -333,31 +345,58 @@ const HomeList = () => {
 
   // Handle  Function
   const handlePagination = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    navigate(`/page/${pageNumber}`);
   };
 
   const previousPage = () => {
     if (currentPage !== 1) {
       setCurrentPage(currentPage - 1);
+      handlePagination(currentPage - 1);
     }
   };
 
   const nextPage = () => {
     if (currentPage <= listData?.totalPages) {
       setCurrentPage(currentPage + 1);
+      handlePagination(currentPage + 1);
     }
   };
+
   return (
-    <Card topElement={topElement}>
+    <Card>
+      {/* Scroll to Top */}
+      <div className="relative">
+        <div ref={topElement} className="absolute -top-32"></div>
+      </div>
+
+      {/* Title */}
       <h2 className="text-center mb-4 text-[#f96c6c] uppercase font-bold text-base md:text-xl">
         To do List
       </h2>
-      <div className="my-4 px-2 text-sm md:text-lg rounded-sm transition-all duration-150 delay-75 hover:text-gray-500 w-full text-right focus:no-underline">
-        <Link to="/add" style={{ textDecoration: "none" }}>
-          + Add a Card
-        </Link>
+
+      <div className="flex justify-between items-center">
+        <input
+          type="number"
+          min={1}
+          max={listData?.data?.length}
+          defaultValue={pagePerSheet}
+          placeholder="Page size"
+          onChange={(e) => {
+            setPagePerSheet(e.target.value);
+            setCurrentPage(1);
+            handlePagination(1);
+          }}
+          className="focus:outline-none px-2 py-1 w-24 rounded-md text-deep-orange-600 font-bold"
+        />
+        {/* Add a Card Button */}
+        <div className="my-4 px-2 text-sm md:text-lg rounded-sm transition-all duration-150 delay-75 hover:text-gray-500 w-full text-right focus:no-underline">
+          <Link to="/add" style={{ textDecoration: "none" }}>
+            + Add a Card
+          </Link>
+        </div>
       </div>
 
+      {/* Content */}
       {isLoading ? (
         <LoadingSpinner />
       ) : (
@@ -371,6 +410,7 @@ const HomeList = () => {
         />
       )}
 
+      {/* Tosattify */}
       <ToastContainer
         position="bottom-left"
         autoClose={5000}
@@ -384,6 +424,7 @@ const HomeList = () => {
         theme="dark"
       />
 
+      {/* Pagination */}
       <Pagination
         handlePagination={handlePagination}
         previousPage={previousPage}

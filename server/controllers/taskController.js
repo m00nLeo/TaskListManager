@@ -5,10 +5,11 @@ import paginate from "../utils/Paging.js";
 // Fetch / Read all tasks
 export const getTasks = (req, res) => {
   const currentPage = parseInt(req.query.page) || 1;
+  const pagePerSheet = parseInt(req.query.page_per_sheet) || 3;
 
   taskModel.getAllTasks((err, data) => {
     if (err) return res.json(err);
-    const paginatedData = paginate(data, currentPage)
+    const paginatedData = paginate(data, currentPage, pagePerSheet)
     return res.json(paginatedData);
   });
 };

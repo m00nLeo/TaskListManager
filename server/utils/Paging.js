@@ -1,10 +1,18 @@
-const PAGE_SIZE = 3; // Kích thước trang mặc định
+function paginate(data, currentPage, pagePerSheet) {
+  // Count total page due to page size (paper per sheet)
+  const totalPages = Math.ceil(data.length / pagePerSheet);
 
-function paginate(data, currentPage) {
-  const totalPages = Math.ceil(data.length / PAGE_SIZE);
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const endIndex = Math.min(currentPage * PAGE_SIZE, data.length);
-  const currentPageData = data.slice(startIndex, endIndex);
+  // Start with next Index item
+  const startIndex = (currentPage - 1) * pagePerSheet;
+
+  // The last page
+  const endIndex = Math.min(currentPage * pagePerSheet, data.length);
+
+  // Order task by Order when drag and drop
+  const sortedTasks = [...data].sort((a, b) => a.order - b.order);
+
+  // Get the array of list data due to page size
+  const currentPageData = sortedTasks.slice(startIndex, endIndex);
 
   return {
     data,

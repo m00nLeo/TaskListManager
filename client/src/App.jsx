@@ -11,6 +11,9 @@ const App = () => {
         <Route path="/" element={<HomeList />} />
         <Route path="/add" element={<AddList />} />
         <Route path="/update/:id" element={<Update />} />
+
+        {/* Router for pagination */}
+        <Route path="/page/:page" element={<HomeList />} />
       </Routes>
     </BrowserRouter>
   );

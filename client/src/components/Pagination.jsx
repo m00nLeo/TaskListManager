@@ -11,6 +11,7 @@ const Pagination = ({
   return (
     <div className={paginationUiClasses.pagination}>
       {/* Previous button */}
+
       <button onClick={previousPage} disabled={currentPage === 1}>
         &laquo;
       </button>
@@ -23,6 +24,7 @@ const Pagination = ({
       )}
 
       {/* Current Page */}
+
       <button
         onClick={() => handlePagination(currentPage)}
         disabled
@@ -39,6 +41,7 @@ const Pagination = ({
       )}
 
       {/* Next button */}
+
       <button onClick={nextPage} disabled={currentPage >= listData?.totalPages}>
         &raquo;
       </button>
