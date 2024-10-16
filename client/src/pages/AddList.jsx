@@ -1,17 +1,17 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useQuery } from "@tanstack/react-query";
+import { fetchList } from "../services/my_api";
+import { useAddList } from "../hooks/useAddList";
 
 const AddList = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
-  const [list, setList] = useState([]);
-  const [order, setOrder] = useState([0]);
   const [errors, setErrors] = useState({});
 
   const day = String(new Date().getDate()).padStart(2, "0");
@@ -19,29 +19,12 @@ const AddList = () => {
   const year = new Date().getFullYear();
   const today = `${year}-${month}-${day}`;
 
-  // Is Loading
-  const [isLoading, setIsLoading] = useState(false);
-
   // Fetch items list
-  const fetchList = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000");
-      setList(response.data.result);
-    } catch (error) {
-      console.error("Error fetching list:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchList();
-  }, []);
-
-  useEffect(() => {
-    if (list.length > 0) {
-      const orders = list.map((e) => e.order);
-      setOrder(orders);
-    }
-  }, [list]);
+  const { data } = useQuery({
+    queryKey: ["list"],
+    queryFn: () => fetchList(),
+    refetchOnWindowFocus: false,
+  });
 
   // Validate form fields
   const validateForm = () => {
@@ -60,36 +43,27 @@ const AddList = () => {
     return Object.keys(validationErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  // UseMutation hook for adding a new list item
+  const { mutate, isSuccess } = useAddList();
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    
-    setIsLoading(true);
-    
-    // If false its mean that has one or more emty input
+
     if (!validateForm()) {
       toast.error("Please fix the errors in the form.", { theme: "dark" });
       return;
     }
 
-    try {
-      await axios.post("http://localhost:3000/add", {
-        order: Math.max(...order) + 1,
-        title,
-        description,
-        date_input: today,
-        deadline: date,
-      });
-      toast.success("Task added successfully", {
-        theme: "light",
-      });
+    const newTask = {
+      order: Math.max(...data?.data?.map((e) => e.order)) + 1,
+      title,
+      description,
+      date_input: today,
+      deadline: date,
+    };
 
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-    } catch (err) {
-      console.error("Error submitting form:", err);
-      toast.error("Failed to add task. Please try again.", { theme: "dark" });
-    }
+    // Trigger the mutation to add a new list
+    mutate(newTask);
   };
 
   return (
@@ -176,7 +150,7 @@ const AddList = () => {
 
         {/* Submit Button */}
         <div className="flex justify-center">
-          {isLoading ? (
+          {isSuccess ? (
             <span className="mt-3 py-2 flex items-center justify-center border w-32 h-fit rounded-lg bg-orange-400/30 cursor-progress">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading...</span>

@@ -1,33 +1,34 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useQuery } from "@tanstack/react-query";
+import { fetchList } from "../services/my_api";
+import { useUpdate } from "../hooks/useUpdate";
 
 const Update = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
-  const [list, setList] = useState([]);
-
-  // Is Loading
-  const [isLoading, setIsLoading] = useState(false);
 
   const { id } = useParams();
 
   // Fetch items list
-  const fetchList = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000");
-      setList(response.data.data);
-    } catch (error) {
-      console.error("Error fetching list:", error);
-    }
-  };
+  const { isFetched, data } = useQuery({
+    queryKey: ["list"],
+    queryFn: () => fetchList(),
+    refetchOnWindowFocus: false,
+  });
 
-  const selectedItem = list?.find((item) => item?.id == id);
+  // Call mutation
+  const { mutate, isSuccess } = useUpdate();
+
+  // Find updated item
+  const selectedItem = data?.data.find((item) => item?.id == id);
+
+  // Date format
   const day = String(new Date(selectedItem?.date_input).getDate()).padStart(
     2,
     "0"
@@ -37,10 +38,7 @@ const Update = () => {
   ).padStart(2, "0");
   const year = new Date(selectedItem?.date_input).getFullYear();
 
-  useEffect(() => {
-    fetchList();
-  }, []);
-
+  // Record change each input
   useEffect(() => {
     if (selectedItem) {
       setTitle(selectedItem.title);
@@ -52,40 +50,23 @@ const Update = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    setIsLoading(true);
-
     // Check if there are any change detected
     if (
       title !== selectedItem?.title ||
       description !== selectedItem?.description ||
       date !== selectedItem?.deadline
     ) {
-      // Send data to database
-      try {
-        await axios.put(`http://localhost:3000/update/${id}`, {
-          order: selectedItem?.order,
-          title: title,
-          description: description,
-          date_input: `${year}-${month}-${day}`,
-          deadline: date,
-        });
+      // Task change record data
+      const updateTask = {
+        order: selectedItem?.order,
+        title: title,
+        description: description,
+        date_input: `${year}-${month}-${day}`,
+        deadline: date,
+      };
 
-        // Return results from server
-        // Toastify
-        toast.success("Task updated", {
-          theme: "light",
-        });
-
-        // Back to hompage
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
-      } catch (err) {
-        console.error("Update failed:", err);
-        toast.error("Failed to update task. Please try again.", {
-          theme: "dar;k",
-        });
-      }
+      // Trigger the mutation to update list
+      mutate({ id, updateTask });
     } else {
       toast.error("No changes detected, no update performed.", {
         theme: "dark",
@@ -142,7 +123,7 @@ const Update = () => {
           />
         </div>
         <div className="flex justify-center">
-          {isLoading ? (
+          {isSuccess ? (
             <span className="mt-3 py-2 flex items-center justify-center border w-32 h-fit rounded-lg bg-orange-400/30 cursor-progress">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading...</span>
@@ -158,19 +139,6 @@ const Update = () => {
           )}
         </div>
       </form>
-
-      <ToastContainer
-        position="bottom-left"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
 
       <div className="hover:text-gray-500">
         <Link to="/" style={{ textDecoration: "none" }}>

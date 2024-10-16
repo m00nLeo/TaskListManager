@@ -1,4 +1,5 @@
 function paginate(data, currentPage, pagePerSheet) {
+  
   // Count total page due to page size (paper per sheet)
   const totalPages = Math.ceil(data.length / pagePerSheet);
 

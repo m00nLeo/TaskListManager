@@ -9,7 +9,7 @@ export const getTasks = (req, res) => {
 
   taskModel.getAllTasks((err, data) => {
     if (err) return res.json(err);
-    const paginatedData = paginate(data, currentPage, pagePerSheet)
+    const paginatedData = paginate(data, currentPage, pagePerSheet);
     return res.json(paginatedData);
   });
 };
@@ -25,7 +25,6 @@ export const createTask = (req, res) => {
     deadline,
     checked: false, // Default checked value
   };
- 
 
   taskModel.createTask(taskData, (err, result) => {
     if (err) return res.json(err);
