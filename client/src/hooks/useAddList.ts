@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { addList } from "../services/my_api";
 import { toast } from "react-toastify";
+import { ListItem } from "../types/ListItem";
 
 export const useAddList = () => {
-  const mutation = useMutation({
-    mutationFn: addList,
+  const mutation = useMutation<ListItem, Error, ListItem>({
+    mutationFn: addList, // addList should return a Promise
     onSuccess: () => {
       toast.success("Task added successfully", {
         theme: "light",

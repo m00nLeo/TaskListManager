@@ -1,10 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { handleUpdate } from "../services/my_api";
+import { ListItem } from "../types/ListItem";
+
+interface UpdateData {
+  id: string;
+  updateTask: Partial<ListItem>;
+}
 
 export const useUpdate = () => {
   const mutation = useMutation({
-    mutationFn: (updatedData) => {
+    mutationFn: (updatedData: UpdateData) => {
       const { id, updateTask } = updatedData;
 
       // Return for a Promise, understand to wait for promise (async, await) before get to onSuccess step

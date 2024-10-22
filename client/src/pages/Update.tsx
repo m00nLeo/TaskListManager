@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
@@ -7,16 +7,18 @@ import "react-toastify/dist/ReactToastify.css";
 import { useQuery } from "@tanstack/react-query";
 import { fetchList } from "../services/my_api";
 import { useUpdate } from "../hooks/useUpdate";
+import { ListItem } from "../types/ListItem";
 
 const Update = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [date, setDate] = useState<string>("");
 
-  const { id } = useParams();
+  // Type the ID param
+  const { id } = useParams<{ id: string }>();
 
   // Fetch items list
-  const { isFetched, data } = useQuery({
+  const { data } = useQuery({
     queryKey: ["list"],
     queryFn: () => fetchList(),
     refetchOnWindowFocus: false,
@@ -26,17 +28,16 @@ const Update = () => {
   const { mutate, isSuccess } = useUpdate();
 
   // Find updated item
-  const selectedItem = data?.data.find((item) => item?.id == id);
+  const selectedItem = data?.data.find((item: ListItem) => item?.id == id);
 
   // Date format
-  const day = String(new Date(selectedItem?.date_input).getDate()).padStart(
-    2,
-    "0"
-  );
-  const month = String(
-    new Date(selectedItem?.date_input).getMonth() + 1
+  const day = String(
+    new Date(selectedItem?.date_input || "").getDate()
   ).padStart(2, "0");
-  const year = new Date(selectedItem?.date_input).getFullYear();
+  const month = String(
+    new Date(selectedItem?.date_input || "").getMonth() + 1
+  ).padStart(2, "0");
+  const year = new Date(selectedItem?.date_input || "").getFullYear();
 
   // Record change each input
   useEffect(() => {
@@ -47,7 +48,7 @@ const Update = () => {
     }
   }, [selectedItem]);
 
-  const handleUpdate = async (e) => {
+  const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Check if there are any change detected
@@ -66,7 +67,7 @@ const Update = () => {
       };
 
       // Trigger the mutation to update list
-      mutate({ id, updateTask });
+      if (id) mutate({ id, updateTask });
     } else {
       toast.error("No changes detected, no update performed.", {
         theme: "dark",

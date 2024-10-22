@@ -1,7 +1,18 @@
 import React from "react";
-import paginationUiClasses from "./pagination.module.css";
+import "./pagination.css";
 
-const Pagination = ({
+// Define the prop types for the Pagination component
+interface PaginationProps {
+  handlePagination: (page: number) => void;
+  previousPage: () => void;
+  nextPage: () => void;
+  currentPage: number;
+  listData: {
+    totalPages: number;
+  } | null; // Optional chaining or null for cases where data isn't fetched
+}
+
+const Pagination: React.FC<PaginationProps> = ({
   handlePagination,
   previousPage,
   nextPage,
@@ -9,7 +20,7 @@ const Pagination = ({
   listData,
 }) => {
   return (
-    <div className={paginationUiClasses.pagination}>
+    <div className="pagination">
       {/* Previous button */}
 
       <button onClick={previousPage} disabled={currentPage === 1}>
@@ -28,13 +39,13 @@ const Pagination = ({
       <button
         onClick={() => handlePagination(currentPage)}
         disabled
-        className={paginationUiClasses.activeButton}
+        className="activeButton"
       >
         {currentPage}
       </button>
 
       {/* If the page you are looking for is more than total pages, then no next page numbers exist */}
-      {currentPage >= listData?.totalPages ? (
+      {currentPage >= (listData?.totalPages ?? 0) ? (
         <></>
       ) : (
         <button onClick={nextPage}>{currentPage + 1}</button>
@@ -42,7 +53,10 @@ const Pagination = ({
 
       {/* Next button */}
 
-      <button onClick={nextPage} disabled={currentPage >= listData?.totalPages}>
+      <button
+        onClick={nextPage}
+        disabled={currentPage >= (listData?.totalPages ?? 0)}
+      >
         &raquo;
       </button>
     </div>

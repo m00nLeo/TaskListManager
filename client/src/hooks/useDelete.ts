@@ -2,7 +2,22 @@ import { useMutation } from "@tanstack/react-query";
 import { handleDelete } from "../services/my_api";
 import { toast } from "react-toastify";
 
-export const useDelete = (data, currentPage) => {
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  date_input: string;
+  deadline: string;
+  order: number;
+  checked: boolean;
+}
+
+interface Data {
+  result: Task[];
+  page: number;
+}
+
+export const useDelete = (data: Data | undefined, currentPage: number) => {
   const mutation = useMutation({
     mutationFn: handleDelete,
     onSuccess: () => {
@@ -10,9 +25,9 @@ export const useDelete = (data, currentPage) => {
 
       // Consider avoiding reloading if unnecessary
       setTimeout(() => {
-        data?.result.length > 1
+        data && data?.result.length > 1
           ? window.location.reload()
-          : data?.page > 1
+          : data && data?.page > 1
           ? (window.location.href = `/page/${currentPage - 1}`)
           : window.location.reload();
       }, 1000);

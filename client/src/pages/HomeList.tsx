@@ -1,20 +1,20 @@
 import React, { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import Card from "../components/Card";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { arrayMoveImmutable as arrayMove } from "array-move"; // Updated import
 import LoadingSpinner from "../components/LoadingSpinner";
 import Pagination from "../components/Pagination";
 import { fetchList } from "../services/my_api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDelete } from "../hooks/useDelete";
 import { useCheckbox } from "../hooks/useCheckbox";
 import SortableList from "./SortableList";
 import { useReorderTasks } from "../hooks/useReorderTasks";
+import Card from "../components/Card";
+import { TaskResponse } from "../types/ListItem";
 
-// ignore warning findDOMNode error caused by `react-sortable-hoc`
+// Ignore warning findDOMNode error caused by `react-sortable-hoc`
 const originalError = console.error;
 console.error = (...args) => {
   if (
@@ -27,19 +27,19 @@ console.error = (...args) => {
   originalError(...args);
 };
 
-const HomeList = () => {
+const HomeList: React.FC = () => {
   // Page per sheet
-  const [pagePerSheet, setPagePerSheet] = useState(3);
+  const [pagePerSheet, setPagePerSheet] = useState<number>(3);
 
   // Current page for Pagination
-  const { page } = useParams();
-  const [currentPage, setCurrentPage] = useState(parseInt(page) || 1);
+  const { page } = useParams<{ page?: string }>();
+  const [currentPage, setCurrentPage] = useState<number>(parseInt(page || "1"));
 
   // useNavigate to programmatically change routes for Pagination page route
   const navigate = useNavigate();
 
   // Scroll to top by using useRef
-  const topElement = useRef(null);
+  const topElement = useRef<HTMLDivElement | null>(null);
 
   const scrollToTop = () => {
     if (topElement.current) {
@@ -50,7 +50,7 @@ const HomeList = () => {
   };
 
   // Fetch item list
-  const { isFetched, data } = useQuery({
+  const { isFetched, data } = useQuery<TaskResponse>({
     queryKey: ["list", currentPage, pagePerSheet],
     queryFn: () => fetchList(currentPage, pagePerSheet),
     refetchOnWindowFocus: false,
@@ -62,14 +62,22 @@ const HomeList = () => {
   // Handle sort end event for drag and drop
   const { mutate: reorderedTaskMutation } = useReorderTasks();
 
-  const onSortEnd = async ({ oldIndex, newIndex }) => {
+  const onSortEnd = async ({
+    oldIndex,
+    newIndex,
+  }: {
+    oldIndex: number;
+    newIndex: number;
+  }) => {
+    if (!data) return;
+
     // Step 1: Sort the tasks based on the 'order' property
     const sortedTasks = [...data?.data].sort((a, b) => a.order - b.order);
 
     // Bonus step: Gives the index where the current page starts in the full list
     const currentPageOffset = (currentPage - 1) * pagePerSheet;
 
-    //  Step 2: Move the item within the sorted array using the absolute indices
+    // Step 2: Move the item within the sorted array using the absolute indices
     const updatedTask = arrayMove(
       sortedTasks,
       oldIndex + currentPageOffset,
@@ -90,7 +98,7 @@ const HomeList = () => {
   const { mutate: deleteMutation } = useDelete(data, currentPage);
 
   // Pagination Function
-  const handlePagination = (pageNumber) => {
+  const handlePagination = (pageNumber: number) => {
     navigate(`/page/${pageNumber}`);
   };
 
@@ -103,7 +111,7 @@ const HomeList = () => {
   };
 
   const nextPage = () => {
-    if (currentPage <= data?.totalPages) {
+    if (currentPage <= (data?.totalPages || 0)) {
       setCurrentPage(currentPage + 1);
       handlePagination(currentPage + 1);
       scrollToTop();
@@ -127,10 +135,10 @@ const HomeList = () => {
           type="number"
           min={1}
           max={data?.data?.length}
-          defaultValue={pagePerSheet}
+          defaultValue={pagePerSheet || 3}
           placeholder="Page size"
           onChange={(e) => {
-            setPagePerSheet(e.target.value);
+            setPagePerSheet(parseInt(e.target.value));
             setCurrentPage(1);
             handlePagination(1);
           }}
@@ -149,7 +157,7 @@ const HomeList = () => {
         <LoadingSpinner />
       ) : (
         <SortableList
-          items={data.result}
+          items={data?.result || []}
           // ensures that only the drag handle is used for dragging
           useDragHandle={true}
           onSortEnd={onSortEnd}
@@ -158,7 +166,7 @@ const HomeList = () => {
         />
       )}
 
-      {/* Tosattify */}
+      {/* Toastify */}
       <ToastContainer
         position="bottom-left"
         autoClose={1000}
@@ -178,7 +186,7 @@ const HomeList = () => {
         previousPage={previousPage}
         nextPage={nextPage}
         currentPage={currentPage}
-        listData={data}
+        listData={data || null}
       />
     </Card>
   );
