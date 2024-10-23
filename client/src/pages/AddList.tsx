@@ -27,6 +27,7 @@ const AddList: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  // Data's last page
   const lastPage = data?.totalPages || 1;
 
   // Validate form fields

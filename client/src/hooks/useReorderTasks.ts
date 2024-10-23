@@ -15,10 +15,6 @@ export const useReorderTasks = () => {
     onSuccess: () => {
       // Refetch the list to reflect the new order
       queryClient.invalidateQueries({ queryKey: ["list"] }); // Replace "list" with your query key if it's different
-
-      toast.success("List order updated successfully", {
-        theme: "light",
-      });
     },
     onError: () => {
       toast.error("Failed to update list order. Please try again.", {
