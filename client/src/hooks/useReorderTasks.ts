@@ -6,6 +6,7 @@ import { ListItem } from "../types/ListItem";
 export const useReorderTasks = () => {
   const queryClient = useQueryClient();
 
+  // Generics <>: set Type
   const mutation = useMutation<void, Error, ListItem[]>({
     mutationFn: async (reorderedTasks: ListItem[]) => {
       // Call API to reorder tasks

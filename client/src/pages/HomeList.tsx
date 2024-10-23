@@ -59,6 +59,9 @@ const HomeList: React.FC = () => {
   // Handle checkbox
   const { mutate: checkboxChangeMutation } = useCheckbox();
 
+  // Handle delete
+  const { mutate: deleteMutation } = useDelete(data, currentPage);
+
   // Handle sort end event for drag and drop
   const { mutate: reorderedTaskMutation } = useReorderTasks();
 
@@ -93,9 +96,6 @@ const HomeList: React.FC = () => {
     // Step 4: Send reordered tasks to the server
     reorderedTaskMutation(reorderedTasks);
   };
-
-  // Handle delete
-  const { mutate: deleteMutation } = useDelete(data, currentPage);
 
   // Pagination Function
   const handlePagination = (pageNumber: number) => {
@@ -163,6 +163,7 @@ const HomeList: React.FC = () => {
           onSortEnd={onSortEnd}
           checkboxChangeMutation={checkboxChangeMutation}
           deleteMutation={deleteMutation}
+          currentPage={currentPage}
         />
       )}
 

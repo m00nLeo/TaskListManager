@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -14,6 +14,10 @@ const Update = () => {
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string>("");
 
+  // useLocation hook to access the parameters passed via state
+  const location = useLocation();
+  const { currentPage } = location.state || {}; // Access the state
+
   // Type the ID param
   const { id } = useParams<{ id: string }>();
 
@@ -25,7 +29,7 @@ const Update = () => {
   });
 
   // Call mutation
-  const { mutate, isSuccess } = useUpdate();
+  const { mutate, isSuccess } = useUpdate(currentPage);
 
   // Find updated item
   const selectedItem = data?.data.find((item: ListItem) => item?.id == id);
@@ -142,7 +146,7 @@ const Update = () => {
       </form>
 
       <div className="hover:text-gray-500">
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to={`/page/${currentPage}`} style={{ textDecoration: "none" }}>
           <div className="mt-2 flex justify-center items-center gap-2">
             <FaLongArrowAltLeft /> Back to homepage
           </div>

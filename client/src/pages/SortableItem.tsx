@@ -1,4 +1,3 @@
-import React from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { MdDeleteOutline } from "react-icons/md";
@@ -11,6 +10,7 @@ interface SortableItemProps {
   value: ListItem;
   checkboxChangeMutation: (data: { id: string; checked: boolean }) => void;
   deleteMutation: (id: string) => void;
+  currentPage: number;
 }
 
 // Create a Drag D component (the dots)
@@ -22,9 +22,14 @@ const DragHandle = SortableHandle(() => (
 ));
 
 // Sortable task item component
-// Generics <>
+// Generics <>: set Type
 const SortableItem = SortableElement<SortableItemProps>(
-  ({ value, checkboxChangeMutation, deleteMutation }: SortableItemProps) => {
+  ({
+    value,
+    checkboxChangeMutation,
+    deleteMutation,
+    currentPage,
+  }: SortableItemProps) => {
     return (
       <div
         className={`flex flex-col md:flex-row items-center gap-1 md:gap-4 bg-white shadow-2xl rounded-lg w-3/4 md:w-full mx-auto md:px-6 py-2 mb-3 transition-all ease-linear duration-150 delay-100 no-select ${
@@ -78,7 +83,10 @@ const SortableItem = SortableElement<SortableItemProps>(
                     <FaRegEdit />
                   </button>
                 ) : (
-                  <Link to={`/update/${value.id}`}>
+                  <Link
+                    to={`/update/${value.id}`}
+                    state={{ currentPage: currentPage }}
+                  >
                     <button className="btn btn-warning">
                       <FaRegEdit />
                     </button>

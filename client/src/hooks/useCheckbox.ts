@@ -10,6 +10,7 @@ interface CheckedData {
 export const useCheckbox = () => {
   const queryClient = useQueryClient();
 
+  // Generics <>: set Type
   const mutation = useMutation<void, Error, CheckedData>({
     mutationFn: async (checkedData: CheckedData) => {
       const { id, checked } = checkedData;

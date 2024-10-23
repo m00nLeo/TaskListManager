@@ -27,6 +27,8 @@ const AddList: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  const lastPage = data?.totalPages || 1;
+
   // Validate form fields
   const validateForm = () => {
     let validationErrors: { [key: string]: string } = {};
@@ -45,7 +47,7 @@ const AddList: React.FC = () => {
   };
 
   // UseMutation hook for adding a new list item
-  const { mutate, isSuccess } = useAddList();
+  const { mutate, isSuccess } = useAddList(lastPage);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -172,7 +174,7 @@ const AddList: React.FC = () => {
 
       {/* Back Link */}
       <div className="hover:text-gray-500">
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to={`/page/${lastPage}`} style={{ textDecoration: "none" }}>
           <div className="mt-2 flex justify-center items-center gap-2">
             <FaLongArrowAltLeft /> Back to homepage
           </div>

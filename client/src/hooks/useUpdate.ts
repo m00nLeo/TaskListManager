@@ -8,7 +8,7 @@ interface UpdateData {
   updateTask: Partial<ListItem>;
 }
 
-export const useUpdate = () => {
+export const useUpdate = (currentPage: number) => {
   const mutation = useMutation({
     mutationFn: (updatedData: UpdateData) => {
       const { id, updateTask } = updatedData;
@@ -24,7 +24,7 @@ export const useUpdate = () => {
 
       // Back to hompage
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = `/page/${currentPage}`;
       }, 1000);
     },
     onError: () => {

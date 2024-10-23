@@ -3,7 +3,8 @@ import { addList } from "../services/my_api";
 import { toast } from "react-toastify";
 import { ListItem } from "../types/ListItem";
 
-export const useAddList = () => {
+export const useAddList = (lastPage: number) => {
+  // Generics <>: set Type
   const mutation = useMutation<ListItem, Error, ListItem>({
     mutationFn: addList, // addList should return a Promise
     onSuccess: () => {
@@ -13,7 +14,7 @@ export const useAddList = () => {
 
       // Redirect to home page after success
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = `/page/${lastPage}`;
       }, 1000);
     },
     onError: () => {

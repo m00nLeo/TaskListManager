@@ -1,23 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { handleDelete } from "../services/my_api";
 import { toast } from "react-toastify";
+import { TaskResponse } from "../types/ListItem";
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  date_input: string;
-  deadline: string;
-  order: number;
-  checked: boolean;
-}
-
-interface Data {
-  result: Task[];
-  page: number;
-}
-
-export const useDelete = (data: Data | undefined, currentPage: number) => {
+export const useDelete = (
+  data: TaskResponse | undefined,
+  currentPage: number
+) => {
   const mutation = useMutation({
     mutationFn: handleDelete,
     onSuccess: () => {
