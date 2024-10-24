@@ -2,9 +2,10 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import taskRoutes from "./routes/taskRoutes.js";
+import "dotenv/config";
 
 const app = express();
-const Port = 3000;
+const Port = process.env.SERVER_PORT;
 
 // Middleware
 app.use(cors());

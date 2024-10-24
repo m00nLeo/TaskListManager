@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import Card from "../components/Card";
 import { FaLongArrowAltLeft } from "react-icons/fa";
@@ -8,18 +8,29 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchList } from "../services/my_api";
 import { useUpdate } from "../hooks/useUpdate";
 import { ListItem } from "../types/ListItem";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+interface FormFields {
+  title: string;
+  description: string;
+  date: string;
+}
 
 const Update = () => {
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-
   // useLocation hook to access the parameters passed via state
   const location = useLocation();
   const { currentPage } = location.state || {}; // Access the state
 
   // Type the ID param
   const { id } = useParams<{ id: string }>();
+
+  // React-hook-form
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormFields>();
 
   // Fetch items list
   const { data } = useQuery({
@@ -34,40 +45,29 @@ const Update = () => {
   // Find updated item
   const selectedItem = data?.data.find((item: ListItem) => item?.id == id);
 
-  // Date format
-  const day = String(
-    new Date(selectedItem?.date_input || "").getDate()
-  ).padStart(2, "0");
-  const month = String(
-    new Date(selectedItem?.date_input || "").getMonth() + 1
-  ).padStart(2, "0");
-  const year = new Date(selectedItem?.date_input || "").getFullYear();
-
-  // Record change each input
+  // Set form values when selectedItem is found
   useEffect(() => {
     if (selectedItem) {
-      setTitle(selectedItem.title);
-      setDescription(selectedItem.description);
-      setDate(selectedItem.deadline);
+      setValue("title", selectedItem.title);
+      setValue("description", selectedItem.description);
+      setValue("date", selectedItem.deadline);
     }
-  }, [selectedItem]);
+  }, [selectedItem, setValue]);
 
-  const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Check if there are any change detected
+  // Handle form submission
+  const onSubmit: SubmitHandler<FormFields> = (formData) => {
     if (
-      title !== selectedItem?.title ||
-      description !== selectedItem?.description ||
-      date !== selectedItem?.deadline
+      formData.title !== selectedItem?.title ||
+      formData.description !== selectedItem?.description ||
+      formData.date !== selectedItem?.deadline
     ) {
       // Task change record data
       const updateTask = {
         order: selectedItem?.order,
-        title: title,
-        description: description,
-        date_input: `${year}-${month}-${day}`,
-        deadline: date,
+        title: formData.title,
+        description: formData.description,
+        date_input: selectedItem?.date_input,
+        deadline: formData.date,
       };
 
       // Trigger the mutation to update list
@@ -83,50 +83,61 @@ const Update = () => {
     <Card fluid={true}>
       <form
         className="flex flex-col bg-white shadow-xl rounded-lg w-full px-8 py-2"
-        onSubmit={handleUpdate}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex flex-col mt-1 mb-2">
           <label className="font-semibold" htmlFor="title">
             Title
           </label>
           <input
+            {...register("title", { required: "Title is required" })}
             type="text"
-            name=""
             id="title"
-            required
-            defaultValue={selectedItem?.title}
             className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
-            onChange={(e) => setTitle(e.target.value)}
           />
+          {errors.title && (
+            <p className="text-red-500 text-sm font-semibold italic mb-2">
+              * {errors.title.message}
+            </p>
+          )}
         </div>
+
         <div className="flex flex-col mt-1 mb-2">
-          <label className="font-semibold" htmlFor="des">
+          <label className="font-semibold" htmlFor="description">
             Description
           </label>
           <input
+            {...register("description", {
+              required: "Description is required",
+            })}
             type="text"
-            name=""
-            id="des"
-            required
-            defaultValue={selectedItem?.description}
+            id="description"
             className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
-            onChange={(e) => setDescription(e.target.value)}
           />
+          {errors.description && (
+            <p className="text-red-500 text-sm font-semibold italic mb-2">
+              * {errors.description.message}
+            </p>
+          )}
         </div>
+
         <div className="flex flex-col mt-1 mb-2">
           <label className="font-semibold" htmlFor="date">
             Date finish
           </label>
           <input
+            {...register("date", { required: "A date must be selected" })}
             type="date"
-            name=""
             id="date"
-            required
-            defaultValue={selectedItem?.deadline}
             className="border border-gray-300 rounded-lg focus:outline-none px-3 py-2"
-            onChange={(e) => setDate(e.target.value)}
           />
+          {errors.date && (
+            <p className="text-red-500 text-sm font-semibold italic mb-2">
+              * {errors.date.message}
+            </p>
+          )}
         </div>
+
         <div className="flex justify-center">
           {isSuccess ? (
             <span className="mt-3 py-2 flex items-center justify-center border w-32 h-fit rounded-lg bg-orange-400/30 cursor-progress">
