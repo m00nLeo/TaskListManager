@@ -169,7 +169,7 @@ const AddList: React.FC = () => {
 
       {/* Back Link */}
       <div className="hover:text-gray-500">
-        <Link to={`/page/${lastPage}`} style={{ textDecoration: "none" }}>
+        <Link to='/' style={{ textDecoration: "none" }}>
           <div className="mt-2 flex justify-center items-center gap-2">
             <FaLongArrowAltLeft /> Back to homepage
           </div>
