@@ -26,6 +26,6 @@ router.put("/", updateTasksOrder);
 router.put("/:id", updateChecked);
 
 // DELETE - Delete a task
-router.delete("/:id", deleteTask);
+router.delete("/delete/:id", deleteTask);
 
 export default router;

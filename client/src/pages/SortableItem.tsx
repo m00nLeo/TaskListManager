@@ -4,6 +4,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { SortableElement, SortableHandle } from "react-sortable-hoc"; //`react-sortable-hoc` relies on findDOMNode so its will cause several warning
 import { ListItem } from "../types/ListItem";
+import DeleteModal from "../components/DeleteModal";
 
 // Props type
 interface SortableItemProps {
@@ -11,6 +12,7 @@ interface SortableItemProps {
   checkboxChangeMutation: (data: { id: string; checked: boolean }) => void;
   deleteMutation: (id: string) => void;
   currentPage: number;
+  deleteSuccess:boolean
 }
 
 // Create a Drag D component (the dots)
@@ -29,6 +31,7 @@ const SortableItem = SortableElement<SortableItemProps>(
     checkboxChangeMutation,
     deleteMutation,
     currentPage,
+    deleteSuccess
   }: SortableItemProps) => {
     return (
       <div
@@ -94,69 +97,7 @@ const SortableItem = SortableElement<SortableItemProps>(
                 )}
 
                 {/* Delete btn */}
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target={`#deleteModal${value.id}`}
-                  disabled={value.checked} // Disable based on the checkbox state
-                >
-                  <MdDeleteOutline />
-                </button>
-
-                {/* Modal */}
-                <div
-                  className="modal fade"
-                  id={`deleteModal${value.id}`}
-                  tabIndex={-1}
-                  data-bs-backdrop="static"
-                  data-bs-keyboard="false"
-                  aria-labelledby="staticBackdropLabel"
-                  aria-hidden="true"
-                >
-                  <div
-                    className="modal-dialog modal-dialog-centered"
-                    role="document"
-                  >
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <h5 className="modal-title font-bold uppercase">
-                          Confirm your delete action
-                        </h5>
-                        <button
-                          type="button"
-                          className="close border-none focus:border-none"
-                          data-bs-dismiss="modal"
-                          aria-label="Close"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                      <div className="modal-body">
-                        This Task: <b>{value.title}</b> will be delete
-                        intermediately, and no other to retake the action.
-                        <br />
-                        Are you sure about your action?
-                      </div>
-                      <div className="modal-footer">
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          data-bs-dismiss="modal"
-                        >
-                          Cancle
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteMutation(value.id)}
-                          className="btn btn-danger"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <DeleteModal value={value} deleteMutation={deleteMutation} deleteSuccess={deleteSuccess}/>
               </div>
             </div>
           </div>

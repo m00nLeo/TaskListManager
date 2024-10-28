@@ -1,16 +1,22 @@
 import * as taskModel from "../models/taskModel.js";
 
-import paginate from "../utils/Paging.js";
-
 // Fetch / Read all tasks
 export const getTasks = (req, res) => {
-  const currentPage = parseInt(req.query.page) || 1;
-  const pagePerSheet = parseInt(req.query.page_per_sheet) || 3;
+  const currentPage = parseInt(req.query.page) || 1; // Offset
+  const pagePerSheet = parseInt(req.query.page_per_sheet) || 3; // Limit
 
-  taskModel.getAllTasks((err, data) => {
-    if (err) return res.json(err);
-    const paginatedData = paginate(data, currentPage, pagePerSheet);
-    return res.json(paginatedData);
+  taskModel.getLimitTasks(pagePerSheet, currentPage, (errLimit, limitData) => {
+    if (errLimit) return res.json(errLimit);
+    taskModel.getCountTasks((err, result) => {
+      if (err) return res.json(err);
+      const response = {
+        data: limitData,
+        result: limitData,
+        page: currentPage,
+        totalPages: Math.ceil(result[0].totalPages / pagePerSheet),
+      };
+      return res.json(response);
+    });
   });
 };
 

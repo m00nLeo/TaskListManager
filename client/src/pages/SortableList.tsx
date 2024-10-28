@@ -7,10 +7,11 @@ interface SortableListProps {
   checkboxChangeMutation: (data: { id: string; checked: boolean }) => void;
   deleteMutation: (id: string) => void;
   currentPage: number
+  deleteSuccess: boolean
 }
 
 const SortableList = SortableContainer<SortableListProps>(
-  ({ items, checkboxChangeMutation, deleteMutation, currentPage }: SortableListProps) => {
+  ({ items, checkboxChangeMutation, deleteMutation, deleteSuccess,currentPage }: SortableListProps) => {
     // Order task by 'order' field for proper drag and drop
     const sortedTasks = [...items].sort((a, b) => a.order - b.order);
     return (
@@ -22,6 +23,7 @@ const SortableList = SortableContainer<SortableListProps>(
             value={value}
             checkboxChangeMutation={checkboxChangeMutation}
             deleteMutation={deleteMutation}
+            deleteSuccess={deleteSuccess}
             currentPage={currentPage}
           />
         ))}

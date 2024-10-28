@@ -49,6 +49,6 @@ export const handleReorderTasks = async (
 
 // Delete list
 export const handleDelete = async (id: string): Promise<VoidFunction> => {
-  const response = await axios.delete(`http://localhost:3001/${id}`);
+  const response = await axios.delete(`http://localhost:3001/delete/${id}`);
   return response.data;
 };

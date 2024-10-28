@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { arrayMoveImmutable as arrayMove } from "array-move"; // Updated import
@@ -35,6 +35,8 @@ const HomeList: React.FC = () => {
   const { page } = useParams<{ page?: string }>();
   const [currentPage, setCurrentPage] = useState<number>(parseInt(page || "1"));
 
+  const location = useLocation();
+
   // useNavigate to programmatically change routes for Pagination page route
   const navigate = useNavigate();
 
@@ -60,7 +62,21 @@ const HomeList: React.FC = () => {
   const { mutate: checkboxChangeMutation } = useCheckbox();
 
   // Handle delete
-  const { mutate: deleteMutation } = useDelete(data, currentPage);
+  const { mutate: deleteMutation, isSuccess: deleteSuccess } = useDelete(
+    data,
+    currentPage
+  );
+
+  // Toastify after Delete successfully
+  useEffect(() => {
+    // Check if deletion was successful
+    if (location.state?.deleteSuccess) {
+      toast.success("Task deleted successfully", { theme: "light" });
+
+      // Reset the state to avoid triggering the toast again
+      navigate(`/page/${currentPage}`, { state: {} });
+    }
+  }, [location.state]);
 
   // Handle sort end event for drag and drop
   const { mutate: reorderedTaskMutation } = useReorderTasks();
@@ -75,7 +91,7 @@ const HomeList: React.FC = () => {
     if (!data) return;
 
     // Step 1: Sort the tasks based on the 'order' property
-    const sortedTasks = [...data?.data].sort((a, b) => a.order - b.order);
+    const sortedTasks = [...data?.result].sort((a, b) => a.order - b.order);
 
     // Bonus step: Gives the index where the current page starts in the full list
     const currentPageOffset = (currentPage - 1) * pagePerSheet;
@@ -134,7 +150,7 @@ const HomeList: React.FC = () => {
         <input
           type="number"
           min={1}
-          max={data?.data?.length}
+          max={data?.totalPages}
           defaultValue={pagePerSheet || 3}
           placeholder="Page size"
           onChange={(e) => {
@@ -163,6 +179,7 @@ const HomeList: React.FC = () => {
           onSortEnd={onSortEnd}
           checkboxChangeMutation={checkboxChangeMutation}
           deleteMutation={deleteMutation}
+          deleteSuccess={deleteSuccess}
           currentPage={currentPage}
         />
       )}

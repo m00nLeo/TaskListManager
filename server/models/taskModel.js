@@ -1,8 +1,20 @@
 import db from "../config/dbConfig.js";
 
+// Fetch all full tasks (only for total page)
+export const getCountTasks = (callback) => {
+// Count database length
+  const countSql = `SELECT COUNT(id) AS totalPages FROM list`;
+
+  db.query(countSql, callback);
+};
+
 // Fetch all tasks
-export const getAllTasks = (callback) => {
-  const sql = "SELECT * FROM list";
+export const getLimitTasks = (limit, offset, callback) => {
+  // Order list that has a limit item that could be listed, and start where offfset begin
+  const sql = `SELECT * FROM list ORDER BY \`order\` ASC LIMIT ${limit} OFFSET ${
+    (offset - 1) * limit
+  }`;
+
   db.query(sql, callback);
 };
 

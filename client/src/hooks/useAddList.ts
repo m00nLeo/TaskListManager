@@ -2,8 +2,11 @@ import { useMutation } from "@tanstack/react-query";
 import { addList } from "../services/my_api";
 import { toast } from "react-toastify";
 import { ListItem } from "../types/ListItem";
+import { useNavigate } from "react-router-dom";
 
 export const useAddList = (lastPage: number) => {
+  const navigate = useNavigate();
+
   // Generics <>: set Type
   const mutation = useMutation<ListItem, Error, ListItem>({
     mutationFn: addList, // addList should return a Promise
@@ -14,7 +17,7 @@ export const useAddList = (lastPage: number) => {
 
       // Redirect to home page after success
       setTimeout(() => {
-        window.location.href = `/page/${lastPage}`;
+        navigate(`/page/${lastPage}`);
       }, 1000);
     },
     onError: () => {
