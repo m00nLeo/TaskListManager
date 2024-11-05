@@ -4,14 +4,11 @@ import { ListItem } from "../types/ListItem";
 
 interface SortableListProps {
   items: ListItem[];
-  checkboxChangeMutation: (data: { id: string; checked: boolean }) => void;
-  deleteMutation: (id: string) => void;
-  currentPage: number
-  deleteSuccess: boolean
+  currentPage: number;
 }
 
 const SortableList = SortableContainer<SortableListProps>(
-  ({ items, checkboxChangeMutation, deleteMutation, deleteSuccess,currentPage }: SortableListProps) => {
+  ({ items, currentPage }: SortableListProps) => {
     // Order task by 'order' field for proper drag and drop
     const sortedTasks = [...items].sort((a, b) => a.order - b.order);
     return (
@@ -21,9 +18,6 @@ const SortableList = SortableContainer<SortableListProps>(
             key={`item-${value.id}`}
             index={index}
             value={value}
-            checkboxChangeMutation={checkboxChangeMutation}
-            deleteMutation={deleteMutation}
-            deleteSuccess={deleteSuccess}
             currentPage={currentPage}
           />
         ))}

@@ -1,18 +1,15 @@
 import { FaRegEdit } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
-import { MdDeleteOutline } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { SortableElement, SortableHandle } from "react-sortable-hoc"; //`react-sortable-hoc` relies on findDOMNode so its will cause several warning
 import { ListItem } from "../types/ListItem";
 import DeleteModal from "../components/DeleteModal";
+import { useCheckbox } from "../hooks/useCheckbox";
 
 // Props type
 interface SortableItemProps {
   value: ListItem;
-  checkboxChangeMutation: (data: { id: string; checked: boolean }) => void;
-  deleteMutation: (id: string) => void;
   currentPage: number;
-  deleteSuccess:boolean
 }
 
 // Create a Drag D component (the dots)
@@ -26,13 +23,20 @@ const DragHandle = SortableHandle(() => (
 // Sortable task item component
 // Generics <>: set Type
 const SortableItem = SortableElement<SortableItemProps>(
-  ({
-    value,
-    checkboxChangeMutation,
-    deleteMutation,
-    currentPage,
-    deleteSuccess
-  }: SortableItemProps) => {
+  ({ value, currentPage }: SortableItemProps) => {
+    // Call mutation
+    const { mutate: checkboxChangeMutation } = useCheckbox();
+
+    // Task record changed
+    const updateTask = {
+      order: value?.order,
+      title: value.title,
+      description: value.description,
+      date_input: value?.date_input,
+      deadline: value.deadline,
+      checked: !value.checked, // Main checked for update (Use axios.patch)
+    };
+
     return (
       <div
         className={`flex flex-col md:flex-row items-center gap-1 md:gap-4 bg-white shadow-2xl rounded-lg w-3/4 md:w-full mx-auto md:px-6 py-2 mb-3 transition-all ease-linear duration-150 delay-100 no-select ${
@@ -97,7 +101,7 @@ const SortableItem = SortableElement<SortableItemProps>(
                 )}
 
                 {/* Delete btn */}
-                <DeleteModal value={value} deleteMutation={deleteMutation} deleteSuccess={deleteSuccess}/>
+                <DeleteModal value={value} currentPage={currentPage} />
               </div>
             </div>
           </div>
@@ -113,10 +117,11 @@ const SortableItem = SortableElement<SortableItemProps>(
             <input
               id={value.id}
               type="checkbox"
+              // Trigger the mutation to update list (for checkbox)
               onChange={() =>
                 checkboxChangeMutation({
                   id: value.id,
-                  checked: !value.checked,
+                  updateTask,
                 })
               }
               // Check if the value is checked in the state

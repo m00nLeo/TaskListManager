@@ -4,7 +4,6 @@ import {
   createTask,
   updateTask,
   updateTasksOrder,
-  updateChecked,
   deleteTask,
 } from "../controllers/taskController.js";
 
@@ -16,14 +15,14 @@ router.get("/", getTasks);
 // POST - Create a task
 router.post("/add", createTask);
 
-// PUT - Update a task
-router.put("/update/:id", updateTask);
+// PATCH - Update a task
+router.patch("/update/:id", updateTask);
+
+// PATCH - Update the checked state
+router.patch("/:id", updateTask);
 
 // PUT - Update task order after drag and drop
 router.put("/", updateTasksOrder);
-
-// PUT - Update the checked state
-router.put("/:id", updateChecked);
 
 // DELETE - Delete a task
 router.delete("/delete/:id", deleteTask);

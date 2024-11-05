@@ -34,8 +34,8 @@ const Update = () => {
 
   // Fetch items list
   const { data } = useQuery({
-    queryKey: ["list"],
-    queryFn: () => fetchList(),
+    queryKey: ["list", currentPage],
+    queryFn: () => fetchList(currentPage),
     refetchOnWindowFocus: false,
   });
 
@@ -43,7 +43,7 @@ const Update = () => {
   const { mutate, isSuccess } = useUpdate(currentPage);
 
   // Find updated item
-  const selectedItem = data?.data.find((item: ListItem) => item?.id == id);
+  const selectedItem = data?.result.find((item: ListItem) => item?.id == id);
 
   // Set form values when selectedItem is found
   useEffect(() => {
@@ -61,7 +61,7 @@ const Update = () => {
       formData.description !== selectedItem?.description ||
       formData.date !== selectedItem?.deadline
     ) {
-      // Task change record data
+      // Task record changed (not included Checkbox)
       const updateTask = {
         order: selectedItem?.order,
         title: formData.title,

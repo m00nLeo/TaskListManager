@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { handleUpdate } from "../services/my_api";
 import { ListItem } from "../types/ListItem";
+import { useNavigate } from "react-router-dom";
 
 interface UpdateData {
   id: string;
@@ -9,6 +10,8 @@ interface UpdateData {
 }
 
 export const useUpdate = (currentPage: number) => {
+  const navigate = useNavigate();
+
   const mutation = useMutation({
     mutationFn: (updatedData: UpdateData) => {
       const { id, updateTask } = updatedData;
@@ -17,15 +20,12 @@ export const useUpdate = (currentPage: number) => {
       return handleUpdate(id, updateTask);
     },
     onSuccess: () => {
-      // Toastify
-      toast.success("Task updated", {
-        theme: "light",
-      });
-
-      // Back to hompage
+      // Back to previous page
       setTimeout(() => {
-        window.location.href = `/page/${currentPage}`;
-      }, 1000);
+        navigate(`/page/${currentPage}`, {
+          state: { updateSuccess: true },
+        });
+      }, 100);
     },
     onError: () => {
       toast.error("Failed to update task. Please try again.", {

@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { handleCheckboxChange } from "../services/my_api";
+import { handleUpdate } from "../services/my_api";
+import { ListItem } from "../types/ListItem";
 
 interface CheckedData {
   id: string;
-  checked: boolean;
+  updateTask: Partial<ListItem>;
 }
 
 export const useCheckbox = () => {
@@ -13,10 +14,10 @@ export const useCheckbox = () => {
   // Generics <>: set Type
   const mutation = useMutation<void, Error, CheckedData>({
     mutationFn: async (checkedData: CheckedData) => {
-      const { id, checked } = checkedData;
+      const { id, updateTask } = checkedData;
 
       // Return for a Promise, understand to wait for promise (async, await) before get to onSuccess step
-      await handleCheckboxChange(id, checked);
+      await handleUpdate(id, updateTask);
       return;
     },
     onSuccess: () => {

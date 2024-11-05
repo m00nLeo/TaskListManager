@@ -46,7 +46,7 @@ CREATE DATABASE tasklist_manager;
 3. Update the `server/config/db.config.ts` file with your own MySQL credentials (host, user, password, and database name):
 
 ```js
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: "localhost",
   user: "your-username",
   password: "your-password",
@@ -87,7 +87,7 @@ cd client
 npm run dev
 ```
 
-By default, the server will run on `http://localhost:3001`, and the client will run on `http://localhost:5174`.
+By default, the server will run on `http://localhost:3001`, and the client will run on `localhost`.
 
 ## Custom MySQL Configuration
 

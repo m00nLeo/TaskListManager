@@ -1,9 +1,12 @@
 import axios from "axios";
 import { ListItem, TaskResponse } from "../types/ListItem";
 
+// Get baseUrl form env
+const baseUrl = import.meta.env.VITE_API_KEY;
+
 // Create / Add list
 export const addList = async (newList: ListItem): Promise<ListItem> => {
-  const response = await axios.post("http://localhost:3001/add", newList);
+  const response = await axios.post(`${baseUrl}/add`, newList);
   return response.data;
 };
 
@@ -13,29 +16,17 @@ export const fetchList = async (
   pagePerSheet?: number
 ): Promise<TaskResponse> => {
   const response = await axios.get(
-    `http://localhost:3001?page=${currentPage}&page_per_sheet=${pagePerSheet}`
+    `${baseUrl}?page=${currentPage}&page_per_sheet=${pagePerSheet}`
   );
   return response.data;
 };
 
-// Update task
+// Update (patch <-> only notice and update the one changed) task and checkbox
 export const handleUpdate = async (
   id: string,
   updateItem: Partial<ListItem>
 ): Promise<ListItem> => {
-  const response = await axios.put(
-    `http://localhost:3001/update/${id}`,
-    updateItem
-  );
-  return response.data;
-};
-
-// Update checkbox
-export const handleCheckboxChange = async (
-  id: string,
-  checked: boolean
-): Promise<ListItem> => {
-  const response = await axios.put(`http://localhost:3001/${id}`, { checked });
+  const response = await axios.patch(`${baseUrl}/update/${id}`, updateItem);
   return response.data;
 };
 
@@ -43,12 +34,12 @@ export const handleCheckboxChange = async (
 export const handleReorderTasks = async (
   reorderedList: ListItem[]
 ): Promise<ListItem[]> => {
-  const response = await axios.put("http://localhost:3001/", reorderedList);
+  const response = await axios.put(`${baseUrl}/`, reorderedList);
   return response.data;
 };
 
 // Delete list
 export const handleDelete = async (id: string): Promise<VoidFunction> => {
-  const response = await axios.delete(`http://localhost:3001/delete/${id}`);
+  const response = await axios.delete(`${baseUrl}/delete/${id}`);
   return response.data;
 };
