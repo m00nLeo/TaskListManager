@@ -33,8 +33,8 @@ const AddList: React.FC = () => {
 
   // Fetch items list
   const { data } = useQuery<TaskResponse>({
-    queryKey: ["list", currentPage],
-    queryFn: () => fetchList(currentPage),
+    queryKey: ["list", currentPage,3],
+    queryFn: () => fetchList(currentPage, 3),
     refetchOnWindowFocus: false,
   });
 

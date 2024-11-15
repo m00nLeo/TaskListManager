@@ -2,6 +2,8 @@
 
 TaskListManager is a feature-rich, full-stack to-do list management app. It allows users to create, update, delete, and manage tasks efficiently. Users can also drag and drop tasks to reorder them and paginate through the list of tasks.
 
+![TaskListManager](./client/src/assets/TheListManager_demo.png)
+
 ## Features
 
 - **Add Task:** Create a new task with a title, description, and deadline.
@@ -9,6 +11,9 @@ TaskListManager is a feature-rich, full-stack to-do list management app. It allo
 - **Delete Task:** Remove a task permanently after confirmation.
 - **Drag and Drop Task Reordering:** Reorder tasks using a drag handle.
 - **Real-time Updates:** Updates task order, completion status, and deletion in real-time.
+- **Modular and Scalable Backend:** Built with NestJS for modularity and scalability, ideal for managing tasks in complex applications.
+- **Database Integration with TypeORM:** Uses TypeORM for seamless MySQL database interactions, ensuring data persistence and ease of querying.
+- **Type-Safe Development:** Leverages TypeScript across both frontend and backend, enhancing code reliability and maintainability.
 
 ## Technologies Used
 
@@ -58,11 +63,17 @@ const db = mysql.createPool({
 
 ### Installing Dependencies
 
-Server-side:
+Server-side (NodeJS):
 
 ```bash
 cd server
 npm install
+```
+Or Server-side (NestJS):
+
+```bash
+cd nestjs-server
+yarn
 ```
 
 Client-side:
@@ -73,11 +84,16 @@ npm install
 ```
 
 Running the Application
-Server:
+To start the NodeJS server:
 
 ```bash
 cd server
 npm start
+```
+To start the NestJS server:
+```bash
+cd nextjs-server
+yarn start:dev
 ```
 
 Client:
